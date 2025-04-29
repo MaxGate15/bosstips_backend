@@ -32,6 +32,7 @@ def get_todays_games(request):
     for g in games
     ]
     return Response({'data': data})
+@api_view(['GET'])
 def get_booking_code(request):
     b = BookingCode.objects.filter(bc_id=1)
     data = [
