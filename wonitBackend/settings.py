@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-vt)-f%85s-x01-6eq^&$q2b3ahs@t8jy)jf4+k0fii0f3sh9)!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://wonit-backend.onrender.com','http://127.0.0.1:8000','http://127.0.0.1:3000']
 
 
 # Application definition
