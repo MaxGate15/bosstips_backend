@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'wonit-backend.onrender.com'  # ✅ Add this line
+    'wonit-backend.onrender.com' ,
 ]
 
 # Application definition
@@ -40,10 +40,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'wonitApi'
+    'wonitApi',
+    'corsheaders'  # ✅ Add this line
+
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3002",
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware'
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
