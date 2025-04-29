@@ -137,6 +137,7 @@ class BookingCode(models.Model):
     bc_id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
 
+
     class Meta:
         managed = True
         db_table = 'BookingCode'
