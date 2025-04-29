@@ -30,4 +30,10 @@ def get_todays_games(request):
     for g in games
     ]
     return Response({'data': data})
-
+def get_booking_code(request):
+    b = BookingCode.objects.filter(bc_id='APUH6K')
+    data = [
+        {'code':c.code}
+        for c in b
+    ]
+    return Response({'codes':data})
