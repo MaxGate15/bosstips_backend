@@ -16,7 +16,9 @@ from rest_framework.decorators import api_view
 def get_todays_games(request):
     today = datetime.date.today()
 
-    games = Games.objects.exclude(game_type='paid')
+    # Case-insensitive exclusion
+    games = Games.objects.exclude(game_type__iexact='paid')
+
     data = [
         {
             'league': g.league,
