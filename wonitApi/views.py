@@ -15,8 +15,8 @@ from rest_framework.decorators import api_view
 @api_view(['GET'])
 def get_todays_games(request):
     today = datetime.date.today()
-    print(today)
-    games = Games.objects.filter(prediction_time=today)
+
+    games = Games.objects.exclude(game_type='paid')
     data = [
         {
             'league': g.league,
@@ -27,7 +27,5 @@ def get_todays_games(request):
         }
         for g in games
     ]
-    print(data)
     return Response({'data': data})
-
 
