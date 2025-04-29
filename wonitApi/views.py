@@ -33,7 +33,7 @@ def get_todays_games(request):
     ]
     return Response({'data': data})
 def get_booking_code(request):
-    b = BookingCode.objects.filter(bc_id='APUH6K')
+    b = BookingCode.objects.filter(bc_id=1)
     data = [
         {'code':c.code}
         for c in b
