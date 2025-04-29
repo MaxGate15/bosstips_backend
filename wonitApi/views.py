@@ -24,7 +24,8 @@ def get_todays_games(request):
             'prediction': g.prediction,
             'result': g.result,
             'resultClass': g.resultClass,
-            'prediction_day': "today"if g.prediction_time == today else "not_today"
+            'prediction_day': "today"if g.prediction_time == today else "not_today",
+            'game_type':g.game_type
     }
     for g in games
     ]
