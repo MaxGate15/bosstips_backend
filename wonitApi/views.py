@@ -23,9 +23,10 @@ def get_todays_games(request):
             'teams': g.teams,
             'prediction': g.prediction,
             'result': g.result,
-            'resultClass': g.resultClass
-        }
-        for g in games
+            'resultClass': g.resultClass,
+            'prediction_day': "today"if g.prediction == today else "not_today"
+    }
+    for g in games
     ]
     return Response({'data': data})
 
