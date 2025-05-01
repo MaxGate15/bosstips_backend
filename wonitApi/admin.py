@@ -4,4 +4,4 @@ from .models import *
 
 admin.site.register(Games)
 admin.site.register(BookingCode)
-
+admin.site.register(Slips)
