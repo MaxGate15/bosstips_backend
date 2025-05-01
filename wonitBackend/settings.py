@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.static',
     'wonitApi',
     'corsheaders'  # ✅ Add this line
 
@@ -99,7 +99,7 @@ DATABASES = {
 }
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Use pathlib style (Django 3.1+)
+STATIC_ROOT = BASE_DIR / 'static'  # Use pathlib style (Django 3.1+)
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",  # Where you place custom static files in development
