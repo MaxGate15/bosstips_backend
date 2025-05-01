@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.static',
+    'django.contrib.staticfiles',
     'wonitApi',
     'corsheaders'  # ✅ Add this line
 
@@ -93,7 +93,7 @@ import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:tReMUidnaXMJgKWBrtCHuKlNdDFWRvxz@shortline.proxy.rlwy.net:42956/railway',
+        default=os.getenv('DATABASE_URL'),
         conn_max_age=1800
     )
 }
