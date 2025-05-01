@@ -123,6 +123,7 @@ class Games(models.Model):
     league = models.TextField()
     teams = models.TextField()
     prediction = models.TextField()
+    prediction_type = models.TextField()
     result = models.CharField(max_length=450)
     resultClass = models.CharField(max_length=450)
     prediction_time = models.DateField(default=now())
@@ -141,3 +142,12 @@ class BookingCode(models.Model):
     class Meta:
         managed = True
         db_table = 'BookingCode'
+class Slips(models.Model):
+    slip_id = models.AutoField(primary_key=True)
+    games = models.ManyToManyField(Games)
+    results = models.TextField()
+    date_created = models.DateField()
+
+    class Meta:
+        managed = True
+        db_table = 'Slips'
