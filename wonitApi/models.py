@@ -121,12 +121,15 @@ class DjangoSession(models.Model):
 class Games(models.Model):
     game_id = models.AutoField(primary_key=True)
     league = models.TextField()
-    teams = models.TextField()
+    team1 = models.TextField()
+    team2 = models.TextField()
     prediction = models.TextField()
     prediction_type = models.TextField()
     result = models.CharField(max_length=450)
-    resultClass = models.CharField(max_length=450)
-    prediction_time = models.DateField(default=now())
+    odd = models.CharField(max_length=450)
+    matchday = models.DateField(default=now())
+    time_created = models.TimeField(default=now())
+    date_created = models.DateField(default=now())
     game_type = models.CharField(max_length=250)
 
     class Meta:
