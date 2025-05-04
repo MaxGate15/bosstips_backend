@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework'
     'wonitApi',
     'corsheaders'  # ✅ Add this line
 
@@ -64,6 +65,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 
 ROOT_URLCONF = 'wonitBackend.urls'
 
