@@ -78,9 +78,9 @@ def get_csrf(request):
 @api_view(['POST'])
 def signup_view(request):
     data = request.data
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
+    username = data.get('email', '').strip()
+    email = data.get('username','').strip()
+    password = data.get('password', '')
 
     if not username or not email or not password:
         return Response({'error': 'Username, email, and password are required'}, status=status.HTTP_400_BAD_REQUEST)
