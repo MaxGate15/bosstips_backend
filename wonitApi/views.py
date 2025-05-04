@@ -13,7 +13,7 @@ class TodaysGamesView(APIView):
         today = date.today()
         games = Games.objects.filter(matchday=today)
         serializer = GamesSerializer(games, many=True)
-        return Response({'data': serializer.data})
+        return Response( serializer.data)
 
 
 class TomorrowGamesView(APIView):
@@ -21,7 +21,7 @@ class TomorrowGamesView(APIView):
         tomorrow = date.today() + timedelta(days=1)
         games = Games.objects.filter(matchday=tomorrow)
         serializer = GamesSerializer(games, many=True)
-        return Response({'data': serializer.data})
+        return Response(serializer.data)
 
 
 class YesterdayGamesView(APIView):
@@ -29,7 +29,7 @@ class YesterdayGamesView(APIView):
         yesterday = date.today() - timedelta(days=1)
         games = Games.objects.filter(matchday=yesterday)
         serializer = GamesSerializer(games, many=True)
-        return Response({'data': serializer.data})
+        return Response(serializer.data)
 
 
 class AnotherDayGamesView(APIView):
@@ -56,7 +56,7 @@ class AnotherDayGamesView(APIView):
             return Response({'message': f'No games found for {formatted_date}'}, status=status.HTTP_200_OK)
 
         serializer = GamesSerializer(games, many=True)
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+        return Response(data=serializer, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
