@@ -78,8 +78,8 @@ def get_csrf(request):
 @api_view(['POST'])
 def signup_view(request):
     data = request.data
-    username = data.get('email', '').strip()
-    email = data.get('username','').strip()
+    username = data.get('username', '').strip()
+    email = data.get('email','').strip()
     password = data.get('password', '')
 
     if not username or not email or not password:
