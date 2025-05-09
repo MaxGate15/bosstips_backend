@@ -145,12 +145,27 @@ class BookingCode(models.Model):
     class Meta:
         managed = True
         db_table = 'BookingCode'
+
+
 class Slips(models.Model):
     slip_id = models.AutoField(primary_key=True)
     games = models.ManyToManyField(Games)
     results = models.TextField()
+    total_odd = models.CharField()
+    price = models.CharField()
     date_created = models.DateField()
 
     class Meta:
         managed = True
         db_table = 'Slips'
+
+
+class Purchase(models.Model):
+    purchase_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(AuthUser,on_delete=models.DO_NOTHING)
+    slip = models.ForeignKey(Slips,on_delete=models.DO_NOTHING)
+    purchase_date = models.DateField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'Purchases'
