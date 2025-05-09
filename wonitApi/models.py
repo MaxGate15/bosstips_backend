@@ -152,7 +152,7 @@ class BookingCode(models.Model):
 
 class Slips(models.Model):
     slip_id = models.AutoField(primary_key=True)
-    games = models.ManyToManyField(Games)
+    games = models.ManyToManyField(Games,related_name='slips')
     results = models.TextField()
     total_odd = models.CharField()
     price = models.CharField()
