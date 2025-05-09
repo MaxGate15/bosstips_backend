@@ -9,6 +9,7 @@ from rest_framework import status
 from django.middleware.csrf import get_token
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+import os
 
 
 class TodaysGamesView(APIView):
@@ -16,7 +17,7 @@ class TodaysGamesView(APIView):
         today = date.today()
         games = Games.objects.filter(matchday=today)
         serializer = GamesSerializer(games, many=True)
-        return Response( serializer.data)
+        return Response(serializer.data)
 
 
 class TomorrowGamesView(APIView):
@@ -75,11 +76,12 @@ def get_booking_code(request):
 def get_csrf(request):
     return Response({'csrfToken': get_token(request)})
 
+
 @api_view(['POST'])
 def signup_view(request):
     data = request.data
     username = data.get('username', '').strip()
-    email = data.get('email','').strip()
+    email = data.get('email', '').strip()
     password = data.get('password', '')
 
     if not username or not email or not password:
@@ -102,3 +104,21 @@ def signup_view(request):
         elif "UNIQUE constraint failed: auth_user.email" in str(e):
             return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'Database error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+import requests
+from django.http import JsonResponse
+
+
+def verify_payment(request, reference):
+    headers = {
+        "Authorization": f"Bearer {os.getenv('PAYSTACK_SECRET_CODE')}"
+    }
+    url = f"https://api.paystack.co/transaction/verify/{reference}"
+    response = requests.get(url, headers=headers)
+    result = response.json()
+
+    if result['data']['status'] == 'success':
+        # mark payment as successful in your DB
+        return JsonResponse({'status': f'success'})
+    return JsonResponse({'status': 'failed'})
