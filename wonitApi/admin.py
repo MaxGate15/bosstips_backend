@@ -4,4 +4,8 @@ from .models import *
 
 admin.site.register(Games)
 admin.site.register(BookingCode)
-admin.site.register(Slips)
+
+
+@admin.register(Slips)
+class SlipsAdmin(admin.ModelAdmin):
+    filter_horizontal = ('games',)  # OR use filter_vertical
