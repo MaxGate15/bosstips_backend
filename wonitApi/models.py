@@ -132,6 +132,9 @@ class Games(models.Model):
     date_created = models.DateField(default=now())
     game_type = models.CharField(max_length=250)
 
+    def __str__(self):
+        return f"{self.team1} vs {self.team2}"
+
     class Meta:
         managed = True
         db_table = 'games'
