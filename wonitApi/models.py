@@ -156,7 +156,9 @@ class Slips(models.Model):
     results = models.TextField()
     total_odd = models.CharField()
     price = models.CharField()
+    booking_code = models.ForeignKey(BookingCode,on_delete=models.DO_NOTHING)
     date_created = models.DateField()
+
 
     class Meta:
         managed = True
