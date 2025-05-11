@@ -13,6 +13,6 @@ class GamesSerializer(serializers.ModelSerializer):
             'team1',
             'team2',
             'prediction',
-            'results',
+            'result',
             'odd',
         ]
