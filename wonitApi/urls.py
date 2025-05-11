@@ -18,5 +18,6 @@ urlpatterns = [
     path('tomorrow-games/',TomorrowGamesView.as_view(),name='tomorrows-game'),
     path('yesterday-games/',YesterdayGamesView.as_view(),name='yesterdays-game'),
     path('other-games',YesterdayGamesView.as_view()),
-    path('codes/',get_booking_code)
+    path('codes/',get_booking_code),
+    path('free-slip/',freeSlip)
 ]
