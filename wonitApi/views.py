@@ -76,6 +76,8 @@ def get_booking_code(request):
 def get_csrf(request):
     return Response({'csrfToken': get_token(request)})
 
+
+@api_view(['GET'])
 def freeSlip(request):
     slip = Slips.objects.filter(price=0.00).first()
     serializer = GamesSerializer(slip, many=True)
