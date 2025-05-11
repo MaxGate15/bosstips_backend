@@ -7,10 +7,12 @@ class GamesSerializer(serializers.ModelSerializer):
         model = Games
         fields = [
             'game_id',
-            'date_created',
+            'matchday',
             'time_created',
             'game_type',
             'team1',
             'team2',
             'prediction',
+            'results',
+            'odd',
         ]
