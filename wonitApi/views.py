@@ -2,7 +2,7 @@ from .models import *
 from rest_framework.decorators import api_view
 from datetime import date, timedelta, datetime
 from .models import Games
-from .serializers import GamesSerializer
+from .serializers import GamesSerializer,SlipSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -80,7 +80,7 @@ def get_csrf(request):
 @api_view(['GET'])
 def freeSlip(request):
     slip = Slips.objects.filter(price=0.00).first()
-    serializer = GamesSerializer(slip)
+    serializer = SlipSerializer(slip)
     return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
