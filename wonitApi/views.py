@@ -76,6 +76,11 @@ def get_booking_code(request):
 def get_csrf(request):
     return Response({'csrfToken': get_token(request)})
 
+def freeSlip(request):
+    slip = Slips.objects.filter(price=0.00).first()
+    serializer = GamesSerializer(slip, many=True)
+    return Response(data=serializer, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 def signup_view(request):
@@ -122,3 +127,7 @@ def verify_payment(request, reference):
         # mark payment as successful in your DB
         return JsonResponse({'status': f'success'})
     return JsonResponse({'status': 'failed'})
+
+import requests
+import math
+
