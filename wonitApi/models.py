@@ -144,7 +144,8 @@ class BookingCode(models.Model):
     bc_id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
 
-
+    def __str__(self):
+        return f"{self.code}"
     class Meta:
         managed = True
         db_table = 'BookingCode'
@@ -155,7 +156,7 @@ class Slips(models.Model):
     games = models.ManyToManyField(Games,related_name='slips')
     results = models.TextField()
     total_odd = models.CharField()
-    price = models.CharField()
+    price = models.DecimalField(decimal_places=2,max_digits=1000)
     booking_code = models.ForeignKey(BookingCode,on_delete=models.DO_NOTHING)
     date_created = models.DateField()
 
