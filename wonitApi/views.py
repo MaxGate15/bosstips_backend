@@ -80,7 +80,7 @@ def get_csrf(request):
 @api_view(['GET'])
 def freeSlip(request):
     slip = Slips.objects.filter(price=0.00).first()
-    serializer = GamesSerializer(slip, many=True)
+    serializer = GamesSerializer(slip)
     return Response(data=serializer, status=status.HTTP_200_OK)
 
 
