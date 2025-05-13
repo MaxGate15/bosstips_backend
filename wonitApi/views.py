@@ -16,7 +16,7 @@ import os
 class TodaysGamesView(APIView):
     def get(self, request):
         today = date.today()
-        slips = Slips.objects.filter(match_day=today, price__in=[Decimal('0.00'), 0])
+        slips = Slips.objects.filter(match_day=today, category='free')
         serializer = SlipSerializer(slips, many=True)
         return Response(serializer.data)
 
