@@ -142,10 +142,12 @@ class Games(models.Model):
 
 class BookingCode(models.Model):
     bc_id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=250)
+    sportyBet_code = models.CharField(max_length=250,default="")
+    betWay_code = models.CharField(max_length=250,default="")
+
 
     def __str__(self):
-        return f"{self.code}"
+        return f"SportyBet: {self.sportyBet_code}\n BetWay: {self.betWay_code}"
     class Meta:
         managed = True
         db_table = 'BookingCode'
@@ -158,6 +160,8 @@ class Slips(models.Model):
     total_odd = models.CharField()
     price = models.DecimalField(decimal_places=2,max_digits=1000)
     booking_code = models.ForeignKey(BookingCode,on_delete=models.DO_NOTHING)
+    match_day = models.DateField(default=now)
+    start_time = models.TimeField(default=now)
     date_created = models.DateField()
 
 
