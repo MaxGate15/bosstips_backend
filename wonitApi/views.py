@@ -1,4 +1,5 @@
 from .models import *
+from decimal import Decimal
 from rest_framework.decorators import api_view
 from datetime import date, timedelta, datetime
 from .models import Games
@@ -15,24 +16,24 @@ import os
 class TodaysGamesView(APIView):
     def get(self, request):
         today = date.today()
-        games = Games.objects.filter(matchday=today)
-        serializer = GamesSerializer(games, many=True)
+        slips = Slips.objects.filter(match_day=today, price__in=[Decimal('0.00'), 0])
+        serializer = SlipSerializer(slips, many=True)
         return Response(serializer.data)
 
 
 class TomorrowGamesView(APIView):
     def get(self, request):
         tomorrow = date.today() + timedelta(days=1)
-        games = Games.objects.filter(matchday=tomorrow)
-        serializer = GamesSerializer(games, many=True)
+        games = Slips.objects.filter(match_day=tomorrow,price__in=[Decimal('0.00'), 0])
+        serializer = SlipSerializer(games, many=True)
         return Response(serializer.data)
 
 
 class YesterdayGamesView(APIView):
     def get(self, request):
         yesterday = date.today() - timedelta(days=1)
-        games = Games.objects.filter(matchday=yesterday)
-        serializer = GamesSerializer(games, many=True)
+        games = Slips.objects.filter(matchday=yesterday,price__in=[Decimal('0.00'), 0])
+        serializer = SlipSerializer(games, many=True)
         return Response(serializer.data)
 
 
