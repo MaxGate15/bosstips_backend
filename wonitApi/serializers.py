@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Games,Slips
+from .models import Games,Slips,BookingCode
 
 
 class GamesSerializer(serializers.ModelSerializer):
@@ -16,9 +16,14 @@ class GamesSerializer(serializers.ModelSerializer):
             'result',
             'odd',
         ]
+class BookingCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookingCode
+        fields = ['bc_id', 'sportyBet_code', 'betWay_code']
 
 class SlipSerializer(serializers.ModelSerializer):
-    games = GamesSerializer(many=True)  # nested serialization
+    games = GamesSerializer(many=True, read_only=True)
+    booking_code = BookingCodeSerializer(read_only=True)
 
     class Meta:
         model = Slips
@@ -33,4 +38,3 @@ class SlipSerializer(serializers.ModelSerializer):
             'start_time',
             'date_created',
         ]
-
