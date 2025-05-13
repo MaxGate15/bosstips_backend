@@ -162,6 +162,12 @@ class Slips(models.Model):
     booking_code = models.ForeignKey(BookingCode,on_delete=models.DO_NOTHING)
     match_day = models.DateField(default=now)
     start_time = models.TimeField(default=now)
+    CATEGORY_CHOICES = [
+        ('free', 'Free'),
+        ('paid', 'Vvip'),
+    ]
+
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES,default="")
     date_created = models.DateField()
 
 
