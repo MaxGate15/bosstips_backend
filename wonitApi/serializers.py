@@ -18,15 +18,19 @@ class GamesSerializer(serializers.ModelSerializer):
         ]
 
 class SlipSerializer(serializers.ModelSerializer):
+    games = GamesSerializer(many=True)  # nested serialization
+
     class Meta:
-        model = Games
+        model = Slips
         fields = [
-            'game_id',
-            'matchday',
-            'time_created',
-            'team1',
-            'team2',
-            'prediction',
-            'result',
-            'odd',
+            'slip_id',
+            'games',
+            'results',
+            'total_odd',
+            'price',
+            'booking_code',
+            'match_day',
+            'start_time',
+            'date_created',
         ]
+
