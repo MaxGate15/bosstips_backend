@@ -3,7 +3,7 @@ from decimal import Decimal
 from rest_framework.decorators import api_view
 from datetime import date, timedelta, datetime
 from .models import Games
-from .serializers import GamesSerializer,SlipSerializer
+from .serializers import GamesSerializer,SlipSerializer,VIPSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -131,6 +131,15 @@ def verify_payment(request, reference):
         return JsonResponse({'status': f'success'})
     return JsonResponse({'status': 'failed'})
 
-import requests
-import math
-
+# class YesterdayGamesVip(APIView):
+#     def get(self, request):
+#         yesterday = date.today() - timedelta(days=1)
+#         games = Slips.objects.filter(match_day=yesterday,category='paid')
+#         serializer = SlipSerializer(games, many=True)
+#         return Response(serializer.data)
+class TodayGamesVip(APIView):
+    def get(self, request):
+        today = date.today()
+        games = Slips.objects.filter(match_day=today,category='paid')
+        serializer = VIPSerializer(games, many=True)
+        return Response(serializer.data)
