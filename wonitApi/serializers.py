@@ -38,3 +38,15 @@ class SlipSerializer(serializers.ModelSerializer):
             'start_time',
             'date_created',
         ]
+class VIPSerializer(serializers.ModelSerializer):
+    games = GamesSerializer(many=True, read_only=True)
+    class Meta:
+        model = Slips
+        fields = [
+            'slip_id',
+            'games',
+            'total_odd',
+            'price',
+            'match_day',
+            'start_time',
+        ]
