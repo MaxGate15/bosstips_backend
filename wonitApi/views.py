@@ -3,7 +3,7 @@ from decimal import Decimal
 from rest_framework.decorators import api_view
 from datetime import date, timedelta, datetime
 from .models import Games
-from .serializers import GamesSerializer,SlipSerializer,VIPSerializer
+from .serializers import GamesSerializer, SlipSerializer, VIPSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -24,7 +24,7 @@ class TodaysGamesView(APIView):
 class TomorrowGamesView(APIView):
     def get(self, request):
         tomorrow = date.today() + timedelta(days=1)
-        games = Slips.objects.filter(match_day=tomorrow,category='free')
+        games = Slips.objects.filter(match_day=tomorrow, category='free')
         serializer = SlipSerializer(games, many=True)
         return Response(serializer.data)
 
@@ -32,7 +32,7 @@ class TomorrowGamesView(APIView):
 class YesterdayGamesView(APIView):
     def get(self, request):
         yesterday = date.today() - timedelta(days=1)
-        games = Slips.objects.filter(match_day=yesterday,category='free')
+        games = Slips.objects.filter(match_day=yesterday, category='free')
         serializer = SlipSerializer(games, many=True)
         return Response(serializer.data)
 
@@ -131,6 +131,7 @@ def verify_payment(request, reference):
         return JsonResponse({'status': f'success'})
     return JsonResponse({'status': 'failed'})
 
+
 # class YesterdayGamesVip(APIView):
 #     def get(self, request):
 #         yesterday = date.today() - timedelta(days=1)
@@ -140,6 +141,47 @@ def verify_payment(request, reference):
 class TodayGamesVip(APIView):
     def get(self, request):
         today = date.today()
-        games = Slips.objects.filter(match_day=today,category='paid')
+        games = Slips.objects.filter(match_day=today, category='paid')
         serializer = VIPSerializer(games, many=True)
         return Response(serializer.data)
+
+
+import json
+import hashlib
+import hmac
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, JsonResponse
+
+
+@csrf_exempt
+def paystack_webhook(request):
+    secret_key = b"sk_live_496e4ae1cb9d821a2d38402c56f0832039461bd0"  # Use your Paystack SECRET key
+
+    # Step 1: Verify signature
+    signature = request.headers.get('x-paystack-signature')
+    payload = request.body
+
+    expected_signature = hmac.new(
+        secret_key,
+        msg=payload,
+        digestmod=hashlib.sha512
+    ).hexdigest()
+
+    if signature != expected_signature:
+        return HttpResponse(status=401)
+
+    # Step 2: Parse event
+    event = json.loads(payload)
+
+    if event['event'] == 'charge.success':
+        data = event['data']
+        reference = data['reference']
+        amount = data['amount']  # in kobo or pesewas
+        email = data['customer']['email']
+
+        # 🧠 Now update your database (e.g., mark as paid)
+        print(f"✅ Payment received: {reference}, {amount}, {email}")
+        # e.g., Payment.objects.filter(reference=reference).update(status='confirmed')
+
+    return HttpResponse(status=200)
