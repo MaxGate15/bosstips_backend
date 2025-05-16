@@ -20,5 +20,6 @@ urlpatterns = [
     path('other-games',YesterdayGamesView.as_view()),
     path('codes/',get_booking_code),
     path('free-slip/',freeSlip),
-    path('vvip-today/',TodayGamesVip.as_view())
+    path('vvip-today/',TodayGamesVip.as_view()),
+    path('paystack/webhook/', paystack_webhook, name='paystack_webhook'),
 ]
