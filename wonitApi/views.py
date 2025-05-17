@@ -181,6 +181,13 @@ def paystack_webhook(request):
         email = data['customer']['email']
 
         # 🧠 Now update your database (e.g., mark as paid)
+        user = AuthUser.objects.filter(email=email)
+        slip = Slips.objects.filter(slip_id=6)
+        p = Purchase(
+            user=user,
+            slip=slip,
+
+        )
         print(f"✅ Payment received: {reference}, {amount}, {email}")
         # e.g., Payment.objects.filter(reference=reference).update(status='confirmed')
 
