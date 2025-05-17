@@ -181,8 +181,8 @@ def paystack_webhook(request):
         email = data['customer']['email']
 
         # 🧠 Now update your database (e.g., mark as paid)
-        user = AuthUser.objects.filter(email=email)
-        slip = Slips.objects.filter(slip_id=6)
+        user = AuthUser.objects.get(email=email)
+        slip = Slips.objects.get(slip_id=6)
         p = Purchase(
             user=user,
             slip=slip,
