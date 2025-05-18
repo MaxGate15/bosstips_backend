@@ -164,8 +164,10 @@ class Slips(models.Model):
     start_time = models.TimeField(default=now)
     CATEGORY_CHOICES = [
         ('free', 'Free'),
-        ('vvip', 'Vvip'),
-        ('vip','Vip')
+        ('vvip1', 'DAILY VVIP PLAN'),
+        ('vvip2','DAILY VVIP PLAN 2'),
+        ('vvip3','DAILY VVIP PLAN 3'),
+        ('vip','DAILY VIP PLAN')
     ]
 
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES,default="")
