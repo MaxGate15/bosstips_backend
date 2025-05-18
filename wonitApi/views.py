@@ -20,7 +20,7 @@ class TodaysGamesView(APIView):
     def get(self, request):
         global today
         slips = Slips.objects.filter(match_day=today, category='free').first()
-        serializer = SlipSerializer(slips, many=True)
+        serializer = SlipSerializer(slips)
         return Response(serializer.data)
 
 
