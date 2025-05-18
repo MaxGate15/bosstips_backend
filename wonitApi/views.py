@@ -203,10 +203,10 @@ def paystack_webhook(request):
         if field.get("display_name"):  # or "Username"
             username = field.get("display_name")
             break
-    print(username)
+    print(username['username'])
     # 3️⃣  Update database safely -------------------------------------------
     try:
-        user = AuthUser.objects.get(username=username)
+        user = AuthUser.objects.get(username=username['username'])
     except AuthUser.DoesNotExist:
         logger.info("Payment for unknown user %s – ignoring", email)
         return HttpResponse(status=200)
