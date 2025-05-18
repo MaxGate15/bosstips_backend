@@ -197,7 +197,6 @@ def paystack_webhook(request):
     amount = data.get("amount")
     email = data.get("customer", {}).get("email")
     custom_fields = data.get("metadata", {}).get("custom_fields", [])
-    print(data)
     username = None
     for field in custom_fields:
         if field.get("display_name"):  # or "Username"
@@ -205,17 +204,11 @@ def paystack_webhook(request):
             break
     print(username['username'])
     # 3️⃣  Update database safely -------------------------------------------
-    try:
-        user = AuthUser.objects.get(username=username['username'])
-    except AuthUser.DoesNotExist:
-        logger.info("Payment for unknown user %s – ignoring", email)
-        return HttpResponse(status=200)
 
-    try:
-        slip = Slips.objects.get(slip_id=6)
-    except Slips.DoesNotExist:
-        logger.error("Configured slip_id=6 does not exist – cannot record purchase")
-        return HttpResponse(status=200)
+    user = AuthUser.objects.get(username=username['username'])
+    slip = Slips.objects.get(slip_id=6)
+
+
 
     try:
         # If purchase already exists we just ignore – idempotent.
@@ -226,13 +219,12 @@ def paystack_webhook(request):
         pass
 
     try:
-        Purchase.objects.create(
+        p= Purchase(
             reference=reference,
             user=user,
-            slip=slip,
-            amount=amount,
-        )
-        logger.info("✅ Payment recorded %s", reference)
+            slip=slip)
+
+        p.save()
     except IntegrityError:
         logger.exception("Could not create Purchase for %s", reference)
 
