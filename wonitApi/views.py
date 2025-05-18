@@ -13,11 +13,13 @@ from django.db import IntegrityError
 import os
 
 today = date.today()
+
+
 class TodaysGamesView(APIView):
 
     def get(self, request):
         global today
-        slips = Slips.objects.filter(match_day=today, category='free')
+        slips = Slips.objects.filter(match_day=today, category='free').first()
         serializer = SlipSerializer(slips, many=True)
         return Response(serializer.data)
 
@@ -25,7 +27,7 @@ class TodaysGamesView(APIView):
 class TomorrowGamesView(APIView):
     def get(self, request):
         tomorrow = date.today() + timedelta(days=1)
-        games = Slips.objects.filter(match_day=tomorrow, category='free')
+        games = Slips.objects.filter(match_day=tomorrow, category='free').first()
         serializer = SlipSerializer(games, many=True)
         return Response(serializer.data)
 
@@ -33,7 +35,7 @@ class TomorrowGamesView(APIView):
 class YesterdayGamesView(APIView):
     def get(self, request):
         yesterday = date.today() - timedelta(days=1)
-        games = Slips.objects.filter(match_day=yesterday, category='free')
+        games = Slips.objects.filter(match_day=yesterday, category='free').first()
         serializer = SlipSerializer(games, many=True)
         return Response(serializer.data)
 
@@ -56,7 +58,7 @@ class AnotherDayGamesView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        games = Games.objects.filter(matchday=matchday)
+        games = Games.objects.filter(matchday=matchday).first()
 
         if not games.exists():
             return Response({'message': f'No games found for {formatted_date}'}, status=status.HTTP_200_OK)
@@ -77,13 +79,6 @@ def get_booking_code(request):
 
 def get_csrf(request):
     return Response({'csrfToken': get_token(request)})
-
-
-@api_view(['GET'])
-def freeSlip(request):
-    slip = Slips.objects.filter(price=0.00).first()
-    serializer = SlipSerializer(slip)
-    return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -142,62 +137,96 @@ def verify_payment(request, reference):
 class TodayGamesVip(APIView):
     def get(self, request):
         today = date.today()
-        games = Slips.objects.filter(match_day=today, category='paid')
+        username = request.headers.get('X-Username')
+        user = AuthUser.objects.get(username=username)
+        purchased_games = Purchase.objects.filter(user=user, purchase_date=today)
+        games = [p.slip for p in purchased_games]
         serializer = VIPSerializer(games, many=True)
         return Response(serializer.data)
 
 
-import json
+from django.http import JsonResponse
+
+from django.http import HttpResponse, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
 import hashlib
 import hmac
+import json
+import os
+import logging
 
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, JsonResponse
-
-
+logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
 def paystack_webhook(request):
-    secret_key = os.getenv('PAYSTACK_SK')
+    """Handle Paystack webhook POSTs.
+
+    We *only* act when we can match an existing user/slip/purchase.
+    Otherwise we log it and still return 200 so Paystack doesn’t retry.
+    """
+    secret_key = os.getenv("PAYSTACK_SK")
     if not secret_key:
+        logger.error("Missing PAYSTACK_SK env var")
         return HttpResponse("Missing PAYSTACK_SK", status=500)
-    secret_key = secret_key.encode()  # hmac needs bytes
 
-    # Use your Paystack SECRET key
+    secret_key = secret_key.encode()
 
-    # Step 1: Verify signature
-    signature = request.headers.get('x-paystack-signature')
+    # 1️⃣  Verify signature ---------------------------------------------------
+    signature = request.headers.get("x-paystack-signature")
     payload = request.body
-
-    expected_signature = hmac.new(
-        secret_key,
-        msg=payload,
-        digestmod=hashlib.sha512
-    ).hexdigest()
+    expected_signature = hmac.new(secret_key, msg=payload, digestmod=hashlib.sha512).hexdigest()
 
     if signature != expected_signature:
-        return HttpResponse(status=401)
+        logger.warning("Webhook signature mismatch")
+        return HttpResponseForbidden()
 
-    # Step 2: Parse event
-    event = json.loads(payload)
+    # 2️⃣  Parse event --------------------------------------------------------
+    try:
+        event = json.loads(payload)
+    except json.JSONDecodeError:
+        logger.exception("Invalid JSON in webhook")
+        return HttpResponse(status=400)
 
-    if event['event'] == 'charge.success':
-        data = event['data']
-        reference = data['reference']
-        amount = data['amount']  # in kobo or pesewas
-        email = data['customer']['email']
+    if event.get("event") != "charge.success":
+        return HttpResponse(status=200)  # ignore other events
 
-        # 🧠 Now update your database (e.g., mark as paid)
+    data = event["data"]
+    reference = data.get("reference")
+    amount = data.get("amount")
+    email = data.get("customer", {}).get("email")
+
+    # 3️⃣  Update database safely -------------------------------------------
+    try:
         user = AuthUser.objects.get(email=email)
+    except AuthUser.DoesNotExist:
+        logger.info("Payment for unknown user %s – ignoring", email)
+        return HttpResponse(status=200)
+
+    try:
         slip = Slips.objects.get(slip_id=6)
-        p = Purchase(
+    except Slips.DoesNotExist:
+        logger.error("Configured slip_id=6 does not exist – cannot record purchase")
+        return HttpResponse(status=200)
+
+    try:
+        # If purchase already exists we just ignore – idempotent.
+        Purchase.objects.get(reference=reference)
+        logger.info("Duplicate webhook for %s – already processed", reference)
+        return HttpResponse(status=200)
+    except Purchase.DoesNotExist:
+        pass
+
+    try:
+        Purchase.objects.create(
+            reference=reference,
             user=user,
             slip=slip,
-
+            amount=amount,
         )
-        p.save()
-        print(f"✅ Payment received: {reference}, {amount}, {email}")
-        # e.g., Payment.objects.filter(reference=reference).update(status='confirmed')
+        logger.info("✅ Payment recorded %s", reference)
+    except IntegrityError:
+        logger.exception("Could not create Purchase for %s", reference)
 
     return HttpResponse(status=200)
