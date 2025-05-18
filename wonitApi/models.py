@@ -181,6 +181,7 @@ class Slips(models.Model):
 
 class Purchase(models.Model):
     purchase_id = models.AutoField(primary_key=True)
+    reference = models.CharField(default='233')
     user = models.ForeignKey(AuthUser,on_delete=models.DO_NOTHING)
     slip = models.ForeignKey(Slips,on_delete=models.DO_NOTHING)
     purchase_date = models.DateField(auto_now=True)
