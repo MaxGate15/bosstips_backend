@@ -12,10 +12,11 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 import os
 
-
+today = date.today()
 class TodaysGamesView(APIView):
+
     def get(self, request):
-        today = date.today()
+        global today
         slips = Slips.objects.filter(match_day=today, category='free')
         serializer = SlipSerializer(slips, many=True)
         return Response(serializer.data)
@@ -154,9 +155,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 
 
+
+
 @csrf_exempt
 def paystack_webhook(request):
-    secret_key = b"sk_live_496e4ae1cb9d821a2d38402c56f0832039461bd0"  # Use your Paystack SECRET key
+    secret_key = os.getenv('PAYSTACK_SK')
+    if not secret_key:
+        return HttpResponse("Missing PAYSTACK_SK", status=500)
+    secret_key = secret_key.encode()  # hmac needs bytes
+
+    # Use your Paystack SECRET key
 
     # Step 1: Verify signature
     signature = request.headers.get('x-paystack-signature')
@@ -188,6 +196,7 @@ def paystack_webhook(request):
             slip=slip,
 
         )
+        p.save()
         print(f"✅ Payment received: {reference}, {amount}, {email}")
         # e.g., Payment.objects.filter(reference=reference).update(status='confirmed')
 
