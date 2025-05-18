@@ -19,16 +19,16 @@ class TodaysGamesView(APIView):
 
     def get(self, request):
         global today
-        slips = Slips.objects.filter(match_day=today, category='free').first()
-        serializer = SlipSerializer(slips)
+        slips = Slips.objects.filter(match_day=today, category='free')
+        serializer = SlipSerializer(slips,many=True)
         return Response(serializer.data)
 
 
 class TomorrowGamesView(APIView):
     def get(self, request):
         tomorrow = date.today() + timedelta(days=1)
-        games = Slips.objects.filter(match_day=tomorrow, category='free').first()
-        serializer = SlipSerializer(games)
+        games = Slips.objects.filter(match_day=tomorrow, category='free')
+        serializer = SlipSerializer(games,many=True)
         return Response(serializer.data)
 
 
@@ -36,7 +36,7 @@ class YesterdayGamesView(APIView):
     def get(self, request):
         yesterday = date.today() - timedelta(days=1)
         games = Slips.objects.filter(match_day=yesterday, category='free').first()
-        serializer = SlipSerializer(games)
+        serializer = SlipSerializer(games,many=True)
         return Response(serializer.data)
 
 
