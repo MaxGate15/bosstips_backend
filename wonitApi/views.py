@@ -196,6 +196,7 @@ def paystack_webhook(request):
     reference = data.get("reference")
     amount = data.get("amount")
     email = data.get("customer", {}).get("email")
+    print(data)
 
     # 3️⃣  Update database safely -------------------------------------------
     try:
