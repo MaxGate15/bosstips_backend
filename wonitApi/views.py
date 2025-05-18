@@ -197,12 +197,13 @@ def paystack_webhook(request):
     amount = data.get("amount")
     email = data.get("customer", {}).get("email")
     custom_fields = data.get("metadata", {}).get("custom_fields", [])
+    print(data)
     username = None
     for field in custom_fields:
         if field.get("display_name"):  # or "Username"
             username = field.get("display_name")
             break
-
+    print(username)
     # 3️⃣  Update database safely -------------------------------------------
     try:
         user = AuthUser.objects.get(username=username)
