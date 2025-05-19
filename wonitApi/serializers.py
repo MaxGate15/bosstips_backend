@@ -37,6 +37,7 @@ class SlipSerializer(serializers.ModelSerializer):
             'match_day',
             'start_time',
             'date_created',
+            'category'
         ]
 class VIPSerializer(serializers.ModelSerializer):
     games = GamesSerializer(many=True, read_only=True)
