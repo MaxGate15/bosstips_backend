@@ -12,13 +12,13 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 import os
 
-today = date.today()
+
 
 
 class TodaysGamesView(APIView):
 
     def get(self, request):
-        global today
+        today = date.today()
         slips = Slips.objects.filter(match_day=today, category='free')
         serializer = SlipSerializer(slips,many=True)
         return Response(serializer.data)
