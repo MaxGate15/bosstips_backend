@@ -48,6 +48,8 @@ class AuthUser(models.Model):
     is_active = models.BooleanField()
     date_joined = models.DateTimeField()
     first_name = models.CharField(max_length=150)
+    def __str__(self):
+        return f"{self.username}"
 
     class Meta:
         managed = False
