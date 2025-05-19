@@ -229,3 +229,22 @@ def paystack_webhook(request):
         logger.exception("Could not create Purchase for %s", reference)
 
     return HttpResponse(status=200)
+
+def currentPurchasedGames(request):
+    username = request.headers.get('X-Username')
+    today = date.today()
+
+    try:
+        user = AuthUser.objects.get(username=username)
+    except AuthUser.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    purchases = Purchase.objects.filter(user=user,purchase_date=today, slip__category__icontains='vip')
+    slips = [purchase.slip for purchase in purchases]
+
+    serializer = SlipSerializer(slips, many=True)
+    print(user,purchases,slips)
+    return JsonResponse(serializer.data, safe=False)
+
+
+
