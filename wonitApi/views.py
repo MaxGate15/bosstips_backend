@@ -249,5 +249,35 @@ def currentPurchasedGames(request):
     serializer = SlipSerializer(slips, many=True)
     return JsonResponse(serializer.data, safe=False)
 
+def previousPurchasedGames(request):
+    username = request.headers.get('X-Username')
+    today = date.today()-timedelta(days=1)
+
+    try:
+        user = AuthUser.objects.get(username=username)
+    except AuthUser.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    purchases = Purchase.objects.filter(user=user, purchase_date=today, slip__category__icontains='vip')
+    slips = [purchase.slip for purchase in purchases]
+
+    serializer = SlipSerializer(slips, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+def goToPurchasedGames(request):
+    username = request.headers.get('x-username')
+    date_ = request.GET.get('date')
+    try:
+        user = AuthUser.objects.get(username=username)
+    except AuthUser.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    purchases = Purchase.objects.filter(user=user, purchase_date=date_, slip__category__icontains='vip')
+    slips = [purchase.slip for purchase in purchases]
+
+    serializer = SlipSerializer(slips, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+
 
 
