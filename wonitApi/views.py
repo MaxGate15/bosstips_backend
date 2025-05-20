@@ -161,6 +161,7 @@ logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def paystack_webhook(request):
+    today = date.today()
     """Handle Paystack webhook POSTs.
 
     We *only* act when we can match an existing user/slip/purchase.
@@ -197,16 +198,19 @@ def paystack_webhook(request):
     amount = data.get("amount")
     email = data.get("customer", {}).get("email")
     custom_fields = data.get("metadata", {}).get("custom_fields", [])
+    game_category = ''
     username = None
     for field in custom_fields:
-        if field.get("display_name"):  # or "Username"
+        if field.get("display_name") and field.get('game_category'):  # or "Username"
             username = field.get("display_name")
+            game_category=field.get('game_category')
             break
-    print(username['username'])
+
     # 3️⃣  Update database safely -------------------------------------------
 
     user = AuthUser.objects.get(username=username['username'])
-    slip = Slips.objects.get(slip_id=6)
+
+    slip = Slips.objects.get(match_day=today,category=game_category)
 
 
 
@@ -243,7 +247,6 @@ def currentPurchasedGames(request):
     slips = [purchase.slip for purchase in purchases]
 
     serializer = SlipSerializer(slips, many=True)
-    print(user,purchases,slips)
     return JsonResponse(serializer.data, safe=False)
 
 
