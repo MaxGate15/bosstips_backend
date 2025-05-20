@@ -281,6 +281,45 @@ def goToPurchasedGames(request):
     serializer = SlipSerializer(slips, many=True)
     return JsonResponse(serializer.data, safe=False)
 
+@api_view(['get'])
+def checkToday(request):
+    updates = {
+        'vip': False,
+        'vvip1': False,
+        'vvip2': False,
+        'vvip3': False
+    }
 
+    today = date.today()
+    todays_slip = Slips.objects.filter(match_day=today, category__in=['vip', 'vvip1', 'vvip2', 'vvip3'])
 
+    if not todays_slip.exists():
+        return JsonResponse(updates, safe=False)
 
+    for slip in todays_slip:
+        cat = slip.category.lower()
+        if cat in updates:
+            updates[cat] = True
+
+    return JsonResponse(updates)
+
+@api_view(['get'])
+def checkUserPurchases(request):
+    updates = {
+        'vip': False,
+        'vvip1': False,
+        'vvip2': False,
+        'vvip3': False
+    }
+    today = date.today()
+    username = request.headers.get('x-username')
+    purchasedGame = Purchase.objects.filter(user__username=username,purchase_date=today)
+    if not purchasedGame.exists():
+        return JsonResponse(updates, safe=False)
+
+    for slip in purchasedGame:
+        cat = slip.category.lower()
+        if cat in updates:
+            updates[cat] = True
+
+    return JsonResponse(updates)
