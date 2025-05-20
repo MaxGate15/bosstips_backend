@@ -23,5 +23,7 @@ urlpatterns = [
     path('paystack/webhook/', paystack_webhook, name='paystack_webhook'),
     path('current-purchased-games/',currentPurchasedGames),
     path('previous-purchased-games/',previousPurchasedGames),
-    path('goto-purchased-games/',goToPurchasedGames)
+    path('goto-purchased-games/',goToPurchasedGames),
+    path('check-today/',checkToday),
+    path('check-user-purchases/',checkUserPurchases),
 ]
