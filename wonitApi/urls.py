@@ -22,4 +22,6 @@ urlpatterns = [
     path('vvip-today/',TodayGamesVip.as_view()),
     path('paystack/webhook/', paystack_webhook, name='paystack_webhook'),
     path('current-purchased-games/',currentPurchasedGames),
+    path('previous-purchased-games/',previousPurchasedGames),
+    path('goto-purchased-games/',goToPurchasedGames)
 ]
