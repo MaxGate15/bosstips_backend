@@ -169,7 +169,7 @@ class Slips(models.Model):
         ('vvip1', 'DAILY VVIP PLAN'),
         ('vvip2','DAILY VVIP PLAN 2'),
         ('vvip3','DAILY VVIP PLAN 3'),
-        ('vip','DAILY VIP PLAN')
+        ('vip','VIP PLAN')
     ]
 
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES,default="")
