@@ -318,7 +318,7 @@ def checkUserPurchases(request):
         return JsonResponse(updates, safe=False)
 
     for slip in purchasedGame:
-        cat = slip.category.lower()
+        cat = slip.slip.category.lower()
         if cat in updates:
             updates[cat] = True
 
