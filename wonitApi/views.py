@@ -234,6 +234,7 @@ def paystack_webhook(request):
 
     return HttpResponse(status=200)
 
+@api_view(['GET'])
 def currentPurchasedGames(request):
     username = request.headers.get('X-Username')
     today = date.today()
@@ -249,6 +250,7 @@ def currentPurchasedGames(request):
     serializer = SlipSerializer(slips, many=True)
     return JsonResponse(serializer.data, safe=False)
 
+@api_view(['GET'])
 def previousPurchasedGames(request):
     username = request.headers.get('X-Username')
     today = date.today()-timedelta(days=1)
@@ -264,6 +266,7 @@ def previousPurchasedGames(request):
     serializer = SlipSerializer(slips, many=True)
     return JsonResponse(serializer.data, safe=False)
 
+@api_view(['GET'])
 def goToPurchasedGames(request):
     username = request.headers.get('x-username')
     date_ = request.GET.get('date')
