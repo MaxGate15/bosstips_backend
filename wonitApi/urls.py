@@ -26,4 +26,5 @@ urlpatterns = [
     path('goto-purchased-games/',goToPurchasedGames),
     path('check-today/',checkToday),
     path('check-user-purchases/',checkUserPurchases),
+    path('purchased-games/',purchasedGames),
 ]

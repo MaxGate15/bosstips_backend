@@ -313,7 +313,7 @@ def checkUserPurchases(request):
     }
     today = date.today()
     username = request.headers.get('x-username')
-    purchasedGame = Purchase.objects.filter(user__username=username,purchase_date=today)
+    purchasedGame = Purchase.objects.filter(user__username=username, purchase_date=today)
     if not purchasedGame.exists():
         return JsonResponse(updates, safe=False)
 
@@ -323,3 +323,12 @@ def checkUserPurchases(request):
             updates[cat] = True
 
     return JsonResponse(updates)
+
+@api_view(['get'])
+def purchasedGames(request):
+    username = request.headers.get('x-username')
+    purchasedGame = Purchase.objects.filter(user__username=username)
+    slips = [purchase.slip for purchase in purchasedGame]
+
+    serializer = SlipSerializer(slips, many=True)
+    return JsonResponse(serializer.data, safe=False)
