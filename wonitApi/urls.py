@@ -27,4 +27,5 @@ urlpatterns = [
     path('check-today/',checkToday),
     path('check-user-purchases/',checkUserPurchases),
     path('purchased-games/',purchasedGames),
+    path('notifications/',notification),
 ]
