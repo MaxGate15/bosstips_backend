@@ -29,7 +29,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'wonit-backend.onrender.com',
-    'https://bozz-tips-backend.onrender.com',
+    'bozz-tips-backend.onrender.com',
 ]
 
 # Application definition
