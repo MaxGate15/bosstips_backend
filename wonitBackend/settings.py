@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3002",
+    'http://localhost:3000'
 ]
 from corsheaders.defaults import default_headers
 
