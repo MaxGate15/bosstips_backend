@@ -194,7 +194,8 @@ class Purchase(models.Model):
 
 class Notifications(models.Model):
     notification_id = models.AutoField(primary_key=True)
-    message = models.TextField()
+    title = models.TextField()
+    body = models.TextField()
     notification_date = models.DateField(auto_now=True)
     seen = models.BooleanField(default=False)
     cleared = models.BooleanField(default=False)

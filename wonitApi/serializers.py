@@ -57,7 +57,8 @@ class NotificationsS(serializers.ModelSerializer):
         model = Notifications
         fields = [
             'notification_id',
-            'message',
+            'title',
+            'body',
             'notification_date',
             'seen',
             'cleared'
