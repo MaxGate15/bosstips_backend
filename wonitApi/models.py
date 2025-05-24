@@ -191,3 +191,17 @@ class Purchase(models.Model):
     class Meta:
         managed = True
         db_table = 'Purchases'
+
+class Notifications(models.Model):
+    notification_id = models.AutoField(primary_key=True)
+    message = models.TextField()
+    notification_date = models.DateField(auto_now=True)
+    seen = models.BooleanField(default=False)
+    cleared = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.message} on {self.notification_date}"
+
+    class Meta:
+        managed=True
+        db_table = 'Notifications'
