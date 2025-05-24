@@ -3,7 +3,7 @@ from decimal import Decimal
 from rest_framework.decorators import api_view
 from datetime import date, timedelta, datetime
 from .models import Games
-from .serializers import GamesSerializer, SlipSerializer, VIPSerializer
+from .serializers import GamesSerializer, SlipSerializer, VIPSerializer,NotificationsS
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -327,8 +327,16 @@ def checkUserPurchases(request):
 @api_view(['get'])
 def purchasedGames(request):
     username = request.headers.get('x-username')
-    purchasedGame = Purchase.objects.filter(user__username=username)
+    thirty_days_ago = date.today() - timedelta(days=30)
+    purchasedGame = Purchase.objects.filter(user__username=username, purchase_date__gte=thirty_days_ago)
     slips = [purchase.slip for purchase in purchasedGame]
 
     serializer = SlipSerializer(slips, many=True)
     return JsonResponse(serializer.data, safe=False)
+
+@api_view(['get'])
+def notification(request):
+    notifications = Notifications.objects.filter(cleared=False)
+    serializer = NotificationsS(notifications,many=True)
+    return JsonResponse(serializer.data,safe=False)
+
