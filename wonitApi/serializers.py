@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Games,Slips,BookingCode
+from .models import Games,Slips,BookingCode,Notifications
 
 
 class GamesSerializer(serializers.ModelSerializer):
@@ -50,4 +50,15 @@ class VIPSerializer(serializers.ModelSerializer):
             'price',
             'match_day',
             'start_time',
+        ]
+
+class NotificationsS(serializers.ModelSerializer):
+    class Meta:
+        model = Notifications
+        fields = [
+            'notification_id',
+            'message',
+            'notification_date',
+            'seen',
+            'cleared'
         ]
