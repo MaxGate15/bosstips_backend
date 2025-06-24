@@ -30,7 +30,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'wonit-backend.onrender.com',
     'bozz-tips-backend.onrender.com',
-    'bozztips-app-57hce.ondigitalocean.app'
+    'bozztips-app-57hce.ondigitalocean.app',
+    'bozz-tips.me',
+    
 ]
 
 # Application definition
@@ -104,9 +106,10 @@ WSGI_APPLICATION = 'wonitBackend.wsgi.application'
 import dj_database_url
 import os
 
+
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:tReMUidnaXMJgKWBrtCHuKlNdDFWRvxz@shortline.proxy.rlwy.net:42956/railway',
+        default='postgresql://doadmin:AVNS_ZfQVpVVt_IQJ5blkBDI@bozz-tips-do-user-23320292-0.e.db.ondigitalocean.com:25060/defaultdb?sslmode=require',
         conn_max_age=1800
     )
 }
