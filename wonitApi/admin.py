@@ -9,7 +9,15 @@ admin.site.register(Purchase)
 
 @admin.register(Slips)
 class SlipsAdmin(admin.ModelAdmin):
-    filter_horizontal = ('games',)  # OR use filter_vertical
+    filter_horizontal = ('games',)
+
+    def has_add_permission(self, request):
+        if BookingCode.objects.count() == 0:
+            messages.set_level(request, messages.ERROR)
+            messages.error(request, "Please add at least one Booking Code before adding a Slip.")
+            return False
+        return super().has_add_permission(request)
+    # OR use filter_vertical
 
 
 from django.contrib import admin
@@ -32,3 +40,12 @@ class NotificationsAdmin(admin.ModelAdmin):
         return request.user.is_superuser
 
 admin.site.register(Notifications, NotificationsAdmin)
+
+from django.contrib import admin
+from django.contrib import messages
+from .models import Slips, BookingCode
+
+# @admin.register(Slips)
+# class SlipsAdmin(admin.ModelAdmin):
+
+
