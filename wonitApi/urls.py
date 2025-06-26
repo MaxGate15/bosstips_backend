@@ -13,7 +13,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/signup/',signup_view),
-    path('', include(router.urls)),
+    path('api/', include(router.urls)),
     path('today-games/',TodaysGamesView.as_view(),name='todays-game'),
     path('tomorrow-games/',TomorrowGamesView.as_view(),name='tomorrows-game'),
     path('yesterday-games/',YesterdayGamesView.as_view(),name='yesterdays-game'),
