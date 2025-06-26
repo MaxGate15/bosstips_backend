@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     'bozz-tips-backend.onrender.com',
     'bozztips-app-57hce.ondigitalocean.app',
     'bozz-tips.me',
+    'admin.bozz-tips.me'
     
 ]
 
