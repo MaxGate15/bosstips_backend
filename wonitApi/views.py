@@ -340,3 +340,64 @@ def notification(request):
     serializer = NotificationsS(notifications,many=True)
     return JsonResponse(serializer.data,safe=False)
 
+from django.shortcuts import redirect
+from django.http import HttpResponse
+
+def admin_redirect_view(request):
+    html = '''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Go to Admin</title>
+        <style>
+            body {
+                background: #f4f6fb;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            .container {
+                background: #fff;
+                padding: 2rem 3rem;
+                border-radius: 12px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+                text-align: center;
+            }
+            h1 {
+                color: #22223b;
+                margin-bottom: 1.5rem;
+            }
+            .admin-btn {
+                background: #2d6cdf;
+                color: #fff;
+                border: none;
+                padding: 0.75rem 2rem;
+                border-radius: 6px;
+                font-size: 1.1rem;
+                cursor: pointer;
+                transition: background 0.2s;
+                box-shadow: 0 2px 8px rgba(45,108,223,0.08);
+            }
+            .admin-btn:hover {
+                background: #1b4fa0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Welcome to the Admin Portal</h1>
+            <form action="/admin/" method="get">
+                <button class="admin-btn" type="submit">Go to Admin Site</button>
+            </form>
+        </div>
+    </body>
+    </html>
+    '''
+    return HttpResponse(html)
+
