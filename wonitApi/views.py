@@ -103,9 +103,9 @@ def signup_view(request):
         )
         return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
     except IntegrityError as e:
-        if "UNIQUE constraint failed: auth_user.username" in str(e):
+        if "username" in str(e):
             return Response({'error': 'Username already taken'}, status=status.HTTP_400_BAD_REQUEST)
-        elif "UNIQUE constraint failed: auth_user.email" in str(e):
+        elif "email" in str(e):
             return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'Database error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
