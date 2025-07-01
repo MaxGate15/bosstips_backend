@@ -101,7 +101,7 @@ def signup_view(request):
             is_staff=False,
             date_joined=now()
         )
-        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+        return Response({'message': 'Account created successfully'}, status=status.HTTP_201_CREATED)
     except IntegrityError as e:
         if "username" in str(e):
             return Response({'error': 'Username already taken'}, status=status.HTTP_400_BAD_REQUEST)
