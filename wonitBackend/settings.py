@@ -31,8 +31,8 @@ ALLOWED_HOSTS = [
     'wonit-backend.onrender.com',
     'bozz-tips-backend.onrender.com',
     'bozztips-app-57hce.ondigitalocean.app',
-    'bozz-tips.me',
-    'admin.bozz-tips.me'
+    'bozz-tips.com',
+    'admin.bozz-tips.com'
     
 ]
 
