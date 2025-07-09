@@ -3,7 +3,7 @@ from decimal import Decimal
 from rest_framework.decorators import api_view
 from datetime import date, timedelta, datetime
 from .models import Games
-from .serializers import GamesSerializer, SlipSerializer, VIPSerializer,NotificationsS
+from .serializers import GamesSerializer, SlipSerializer, VIPSerializer,NotificationsS,SlipPriceSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -339,6 +339,19 @@ def notification(request):
     notifications = Notifications.objects.filter(cleared=False)
     serializer = NotificationsS(notifications,many=True)
     return JsonResponse(serializer.data,safe=False)
+@api_view(['get'])
+def yesterdayVVIPGames(request):
+    yesterday = date.today() - timedelta(days=1)
+    vvip_slips = Slips.objects.filter(match_day=yesterday, category__icontains='vvip')
+    serializer = SlipSerializer(vvip_slips, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+@api_view(['get'])
+def vvipPrice(request):
+    today = date.today()
+    vvip_slips = Slips.objects.filter(match_day=today, category__icontains='vvip')
+    serializer = SlipPriceSerializer(vvip_slips, many=True)
+    return JsonResponse(serializer.data, safe=False)
 
 from django.shortcuts import redirect
 from django.http import HttpResponse

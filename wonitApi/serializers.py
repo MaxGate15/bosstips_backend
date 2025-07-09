@@ -20,6 +20,19 @@ class BookingCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookingCode
         fields = ['bc_id', 'sportyBet_code', 'betWay_code']
+# # Serializer for Slips model that includes only the price  fields 
+class SlipPriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Slips
+        fields = [
+            'slip_id',
+            'total_odd',
+            'price',
+            'match_day',
+            'start_time',
+            'category',
+        ]
+# Serializer for Slips model that includes all fields except games
 
 class SlipSerializer(serializers.ModelSerializer):
     games = GamesSerializer(many=True, read_only=True)
@@ -51,6 +64,7 @@ class VIPSerializer(serializers.ModelSerializer):
             'match_day',
             'start_time',
         ]
+
 
 class NotificationsS(serializers.ModelSerializer):
     class Meta:
