@@ -268,14 +268,10 @@ def previousPurchasedGames(request):
 
 @api_view(['GET'])
 def goToPurchasedGames(request):
-    username = request.headers.get('x-username')
     date_ = request.GET.get('date')
-    try:
-        user = AuthUser.objects.get(username=username)
-    except AuthUser.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
+    
 
-    purchases = Purchase.objects.filter(user=user, purchase_date=date_, slip__category__icontains='vip')
+    purchases = Purchase.objects.filter(purchase_date=date_, slip__category__icontains='vip')
     slips = [purchase.slip for purchase in purchases]
 
     serializer = SlipSerializer(slips, many=True)
@@ -291,7 +287,12 @@ def checkToday(request):
     }
 
     today = date.today()
-    todays_slip = Slips.objects.filter(match_day=today, category__in=['vip', 'vvip1', 'vvip2', 'vvip3'])
+    now = timezone.now().time()
+    todays_slip = Slips.objects.filter(
+        match_day=today,
+        category__in=['vip', 'vvip1', 'vvip2', 'vvip3'],
+        start_time__gt=now
+    )
 
     if not todays_slip.exists():
         return JsonResponse(updates, safe=False)
@@ -355,6 +356,7 @@ def vvipPrice(request):
 
 from django.shortcuts import redirect
 from django.http import HttpResponse
+from django.utils import timezone
 
 def admin_redirect_view(request):
     html = '''
