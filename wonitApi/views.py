@@ -267,6 +267,15 @@ def previousPurchasedGames(request):
     return JsonResponse(serializer.data, safe=False)
 
 @api_view(['GET'])
+def goToFreeGames(request):
+    date_ = request.GET.get('date')
+    purchases = Slips.objects.filter(match_day=date_, category__icontains='free')
+    
+
+    serializer = SlipSerializer(purchases, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+@api_view(['GET'])
 def goToPurchasedGames(request):
     date_ = request.GET.get('date')
     purchases = Slips.objects.filter(match_day=date_, category__icontains='vip')
