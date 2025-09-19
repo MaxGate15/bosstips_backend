@@ -160,6 +160,7 @@ class Slips(models.Model):
     games = models.ManyToManyField(Games,related_name='slips')
     results = models.TextField()
     total_odd = models.CharField()
+    status = models.CharField(max_length=250,default="pending")
     price = models.DecimalField(decimal_places=2,max_digits=1000)
     booking_code = models.ForeignKey(BookingCode,on_delete=models.DO_NOTHING)
     match_day = models.DateField(default=now)

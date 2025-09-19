@@ -32,4 +32,7 @@ urlpatterns = [
     path('check-user-purchases/',checkUserPurchases),
     path('purchased-games/',purchasedGames),
     path('notifications/',notification),
+    path('total-users/',get_total_number_of_users),
+    path('pending-slips/',get_number_of_pending_slips),
+    path('purchased-slips/',get_number_of_purchased_slips),
 ]

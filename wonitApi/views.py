@@ -2,7 +2,7 @@ from .models import *
 from decimal import Decimal
 from rest_framework.decorators import api_view
 from datetime import date, timedelta, datetime
-from .models import Games
+from .models import Games, BookingCode, Slips, AuthUser, Purchase, Notifications
 from .serializers import GamesSerializer, SlipSerializer, VIPSerializer,NotificationsS,SlipPriceSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -423,3 +423,14 @@ def admin_redirect_view(request):
     '''
     return HttpResponse(html)
 
+def get_total_number_of_users(request):
+    total_users = AuthUser.objects.count()
+    return JsonResponse({"total_users": total_users})
+
+def get_number_of_pending_slips(request):
+    pending_slips = Slips.objects.filter(status='pending').count()
+    return JsonResponse({"pending_slips": pending_slips})
+
+def get_number_of_purchased_slips(request):
+    purchased_slips = Purchase.objects.all().count()
+    return JsonResponse({"purchased_slips": purchased_slips})
