@@ -63,6 +63,7 @@ class VIPSerializer(serializers.ModelSerializer):
             'price',
             'match_day',
             'start_time',
+            "booking_code"
         ]
 
 

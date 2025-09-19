@@ -35,4 +35,10 @@ urlpatterns = [
     path('total-users/',get_total_number_of_users),
     path('pending-slips/',get_number_of_pending_slips),
     path('purchased-slips/',get_number_of_purchased_slips),
+    path('load-booking/<str:code>/',load_booking_data),
+    path('api/upload-slip/', upload_slip),
+    path("get-all-slips/", get_all_slips),
+    path("get-available-plans/", get_avaliable_vip_plans),
+    path("mark-slip-as-sold/<int:slip_id>/", mark_slip_as_sold_out),
+    path("get-slip-status", get_slip_for_todays_status),
 ]

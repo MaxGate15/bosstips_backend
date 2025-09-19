@@ -11,6 +11,9 @@ from django.middleware.csrf import get_token
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 import os
+from .sporty import get_booking
+from django.db import transaction
+from django.utils import timezone
 
 
 
@@ -434,3 +437,196 @@ def get_number_of_pending_slips(request):
 def get_number_of_purchased_slips(request):
     purchased_slips = Purchase.objects.all().count()
     return JsonResponse({"purchased_slips": purchased_slips})
+
+def load_booking_data(request, code):
+    try:
+        data = get_booking(code)
+        # JsonResponse requires safe=True for dicts, safe=False for lists
+        if isinstance(data, dict):
+            return JsonResponse(data)
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        # log if you have logging configured, return 500 with error info
+        return JsonResponse({'error': 'Failed to load booking data'}, status=500)
+
+@api_view(['POST'])
+def upload_slip(request):
+    """
+    Accepts a JSON payload for a bet slip, validates required fields,
+    creates a Slips record and related Games records, then returns the saved ids.
+    """
+    payload = request.data or {}
+    required = ['sportyCode', 'msportCode', 'totalOdds', 'games', 'price']
+    missing = [f for f in required if not payload.get(f) and payload.get(f) != 0]
+    if missing:
+        return Response({'error': 'Missing required fields', 'missing': missing}, status=status.HTTP_400_BAD_REQUEST)
+
+    games_payload = payload.get('games')
+    if not isinstance(games_payload, list) or len(games_payload) == 0:
+        return Response({'error': 'games must be a non-empty list'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        price = Decimal(str(payload.get('price')))
+    except Exception:
+        return Response({'error': 'price must be numeric'}, status=status.HTTP_400_BAD_REQUEST)
+
+    total_odds = str(payload.get('totalOdds'))
+    sporty_code = str(payload.get('sportyCode'))
+    msport_code = str(payload.get('msportCode'))
+    slip_result = payload.get('slipResult', '')
+    category_in = str(payload.get('category', '') or '').strip()
+
+    # Normalize and map possible human-readable category strings to internal category keys
+    cat_norm = category_in.lower()
+    if not cat_norm:
+        category = 'free'
+    elif 'vvip' in cat_norm:
+        # Examples: 'DAILY VVIP PLAN', 'DAILY VVIP2 PLAN', 'VVIP 3', 'vvip1'
+        import re
+        m = re.search(r'vvip\s*([1-3])', cat_norm)
+        if m:
+            category = f"vvip{m.group(1)}"
+        else:
+            # Try to find a digit anywhere (e.g. 'vvip2')
+            m2 = re.search(r'([1-3])', cat_norm)
+            if m2:
+                category = f"vvip{m2.group(1)}"
+            else:
+                # default mapping for generic vvip mentions
+                category = 'vvip1'
+    elif 'vip' in cat_norm:
+        category = 'vip'
+    else:
+        category = 'free'
+
+    today = date.today()
+    now_time = timezone.now().time()
+
+    try:
+        with transaction.atomic():
+            booking, _ = BookingCode.objects.get_or_create(
+                sportyBet_code=sporty_code,
+                defaults={'betWay_code': msport_code}
+            )
+
+            slip = Slips.objects.create(
+                results=slip_result,
+                total_odd=total_odds,
+                status='pending',
+                price=price,
+                booking_code=booking,
+                match_day=today,
+                start_time=now_time,
+                category=category,
+                date_created=today
+            )
+
+            # prepare Games instances for bulk_create
+            game_objs = []
+            for g in games_payload:
+                team1 = g.get('team1') or ''
+                team2 = g.get('team2') or ''
+                prediction = g.get('prediction') or ''
+                odds = str(g.get('odds') or '')
+                league = g.get('category') or ''
+                result = g.get('result') or ''
+                game_objs.append(
+                    Games(
+                        league=league,
+                        team1=team1,
+                        team2=team2,
+                        prediction=prediction,
+                        prediction_type=prediction,
+                        result=result,
+                        odd=odds,
+                        matchday=today,
+                        time_created=now_time,
+                        date_created=today,
+                        game_type=''
+                    )
+                )
+
+            created_games = Games.objects.bulk_create(game_objs)
+
+            # Associate games with the slip (ManyToMany)
+            slip.games.set(created_games)
+
+    except Exception as exc:
+        return Response({'error': 'Failed to save slip'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # Build response payload
+    resp = {
+        'slip': {
+            'slip_id': slip.slip_id,
+            'total_odd': slip.total_odd,
+            'price': str(slip.price),
+            'category': slip.category,
+            'booking_code': booking.sportyBet_code
+        },
+        'games': [
+            {
+                'game_id': g.game_id,
+                'team1': g.team1,
+                'team2': g.team2,
+                'prediction': g.prediction,
+                'odd': g.odd,
+                'league': g.league,
+                'result': g.result
+            } for g in created_games
+        ]
+    }
+
+    return Response({'message': 'Saved slip and games', 'data': resp}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+def get_all_slips(request):
+    slips = Slips.objects.all()
+    serializer = SlipSerializer(slips, many=True)
+    slips = serializer.data
+    return Response({'slips': slips}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_avaliable_vip_plans(request):
+    today = date.today()
+    plan_keys = ["vip", "vvip1", "vvip2", "vvip3"]
+    result = {k: False for k in plan_keys}
+    try:
+        # Single query to fetch today's categories, normalize to avoid casing/whitespace mismatches
+        categories = Slips.objects.filter(match_day=today).values_list('category', flat=True)
+        print( categories)
+        normalized = { (c or '').strip().lower() for c in categories }
+
+        for plan in plan_keys:
+            result[plan] = plan.lower() in normalized
+
+        return Response(result, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": "Failed to check plans", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+def get_slip_for_todays_status(request, category):
+    today = date.today()
+    try:
+        slip = Slips.objects.get(match_day=today, category__iexact=category)
+        serializer = SlipSerializer(slip)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Slips.DoesNotExist:
+        return Response({"error": "Slip not found for today with the specified category"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": "Failed to retrieve slip", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(["POST"])
+def mark_slip_as_sold_out(request, slip_id):
+    
+    if not slip_id:
+        return Response({"error": "slip_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        slip = Slips.objects.get(slip_id=slip_id)
+        slip.status = "sold"
+        slip.save()
+        return Response({"message": f"Slip {slip_id} marked as sold"}, status=status.HTTP_200_OK)
+    except Slips.DoesNotExist:
+        return Response({"error": "Slip not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": "Failed to update slip", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
