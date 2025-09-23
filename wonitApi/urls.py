@@ -40,5 +40,12 @@ urlpatterns = [
     path("get-all-slips/", get_all_slips),
     path("get-available-plans/", get_avaliable_vip_plans),
     path("mark-slip-as-sold/<int:slip_id>/", mark_slip_as_sold_out),
-    path("get-slip-status", get_slip_for_todays_status),
+    path("mark-slip-as-available/<int:slip_id>/", mark_slip_as_available),
+    path("get-slip-status-for-today/", get_slip_for_todays_status),
+    path("update-slip/<int:slip_id>/", mark_slip_as_sold_out),
+    path("update-game-result/<int:game_id>/<str:result>/", game_results),
+    path("mark-slip-as-updated/<int:slip_id>/", mark_slip_as_updated),
+    path("get-slip-status/",get_slip_status),
+    path('api/users/', api_users_list),  # new endpoint
+    path("send-sms/", send_bulk_sms),
 ]

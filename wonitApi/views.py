@@ -14,6 +14,8 @@ import os
 from .sporty import get_booking
 from django.db import transaction
 from django.utils import timezone
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
 
 
@@ -512,7 +514,7 @@ def upload_slip(request):
             slip = Slips.objects.create(
                 results=slip_result,
                 total_odd=total_odds,
-                status='pending',
+                status='available',
                 price=price,
                 booking_code=booking,
                 match_day=today,
@@ -581,7 +583,7 @@ def upload_slip(request):
 
 @api_view(['GET'])
 def get_all_slips(request):
-    slips = Slips.objects.all()
+    slips = Slips.objects.all().order_by('-match_day', '-start_time')
     serializer = SlipSerializer(slips, many=True)
     slips = serializer.data
     return Response({'slips': slips}, status=status.HTTP_200_OK)
@@ -630,3 +632,140 @@ def mark_slip_as_sold_out(request, slip_id):
         return Response({"error": "Slip not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": "Failed to update slip", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@api_view(["POST"])
+def mark_slip_as_available(request, slip_id):
+    
+    if not slip_id:
+        return Response({"error": "slip_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        slip = Slips.objects.get(slip_id=slip_id)
+        slip.status = "available"
+        slip.save()
+        return Response({"message": f"Slip {slip_id} marked as available"}, status=status.HTTP_200_OK)
+    except Slips.DoesNotExist:
+        return Response({"error": "Slip not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": "Failed to update slip", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+def mark_slip_as_updated(request, slip_id):
+    slip = Slips.objects.filter(slip_id=slip_id).first()
+    if not slip:
+        return Response({"error": "Slip not found"}, status=status.HTTP_404_NOT_FOUND)
+    slip.results = "updated"
+    slip.save()
+    return Response({"message": f"Slip {slip_id} marked as updated"}, status=status.HTTP_200_OK)
+    
+@api_view(['POST'])
+def game_results(request, game_id, result):
+    game = Games.objects.filter(game_id=game_id).first()
+    if not game:
+        return Response({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
+    game.result=result
+    try:
+        game.save()
+        return Response({"message": f"Game {game_id} result updated to {result}"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": "Failed to update game result", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_slip_status(request):
+
+    today = date.today()
+    try:
+        slips = Slips.objects.filter(match_day=today).all()
+        slip_statuses = [
+            {"category": slip.category, "status": slip.status, "slip_id": slip.slip_id}
+            for slip in slips
+        ]
+        return Response(slip_statuses, status=status.HTTP_200_OK)
+    except Slips.DoesNotExist:
+        return Response({"error": "Slip not found for today with the specified category"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": "Failed to retrieve slip", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UserListSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    initials = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_user_model()
+        fields = ('id', 'name', 'username', 'email', 'phone', 'status', 'initials')
+
+    def get_name(self, obj):
+        first = (getattr(obj, 'first_name', '') or '').strip()
+        last = (getattr(obj, 'last_name', '') or '').strip()
+        return f"{first} {last}".strip()
+
+    def get_username(self, obj):
+        uname = getattr(obj, 'username', '') or ''
+        return f"@{uname.lstrip('@')}" if uname else ""
+
+    def get_phone(self, obj):
+        # common phone field names — return empty string if not present
+        for attr in ('phone', 'phone_number', 'mobile'):
+            if hasattr(obj, attr):
+                return getattr(obj, attr) or ""
+        return ""
+
+    def get_status(self, obj):
+        return "Active" if getattr(obj, 'is_active', False) else "Inactive"
+
+    def get_initials(self, obj):
+        fn = (getattr(obj, 'first_name', '') or '').strip()
+        ln = (getattr(obj, 'last_name', '') or '').strip()
+        initials = ""
+        if fn:
+            initials += fn[0].upper()
+        if ln:
+            initials += ln[0].upper()
+        return initials
+
+@api_view(['GET'])
+def api_users_list(request):
+    """
+    GET /api/users/  -> returns list of users with computed name, initials, etc.
+    """
+    User = get_user_model()
+    users_qs = User.objects.all().order_by('id')
+    serializer = UserListSerializer(users_qs, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+def get_all_users_phone_numbers(request):
+    """
+    GET /api/users/phone-numbers/  -> returns list of users with their phone numbers
+    """
+    
+    users_qs = AuthUser.objects.all().order_by('id')
+    phone_numbers = [
+        {"id": user.id, "phone": user.phone}
+        for user in users_qs if user.phone
+    ]
+    return Response(phone_numbers, status=status.HTTP_200_OK)
+
+def send_sms(recipient:list, message:str):
+    endPoint = 'https://api.mnotify.com/api/sms/quick'
+    apiKey = 'xmI6Ky5UWpQJJnKgzPrWlD07B'
+    url = endPoint + '?key=' + apiKey
+
+    data = {
+        "recipient": recipient,
+        "sender": "Bozz-tips",
+        "message": message,
+        "is_schedule": False,
+        "schedule_date": "",
+    }
+
+    response = requests.post(url, json=data)
+    return response.json()
+
+@api_view(['POST'])
+def send_bulk_sms(request):
+    numbers = get_all_users_phone_numbers(request).data
+    phone_list = [entry['phone'] for entry in numbers if entry['phone']]
+    message = request.data.get("message", "")
+    response = send_sms(phone_list, message)
+    return Response(response, status=status.HTTP_200_OK)
