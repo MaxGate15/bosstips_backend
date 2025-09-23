@@ -769,3 +769,12 @@ def send_bulk_sms(request):
     message = request.data.get("message", "")
     response = send_sms(phone_list, message)
     return Response(response, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def is_admin_user(request):
+    username = request.headers.get('X-Username')
+    try:
+        user = AuthUser.objects.get(username=username)
+        return Response({'is_admin': user.is_superuser}, status=status.HTTP_200_OK)
+    except AuthUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)

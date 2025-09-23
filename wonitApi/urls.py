@@ -48,4 +48,5 @@ urlpatterns = [
     path("get-slip-status/",get_slip_status),
     path('api/users/', api_users_list),  # new endpoint
     path("send-sms/", send_bulk_sms),
+    path("check-admin/", is_admin_user),
 ]
