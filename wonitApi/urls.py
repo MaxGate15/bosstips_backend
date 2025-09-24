@@ -49,4 +49,9 @@ urlpatterns = [
     path('api/users/', api_users_list),  # new endpoint
     path("send-sms/", send_bulk_sms),
     path("check-admin/", is_admin_user),
+    path("add-admin/<str:username>/<int:is_superuser>/<int:is_staff>/", add_admin_user),
+    path("remove-admin/<str:username>/", demote_admin_user),
+    path("get-user/<str:username>/", get_user_by_username),  # new endpoint
+    path("get-admins/", get_admins),  # new endpoint
+
 ]

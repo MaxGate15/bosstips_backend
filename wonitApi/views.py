@@ -778,3 +778,67 @@ def is_admin_user(request):
         return Response({'is_admin': user.is_superuser}, status=status.HTTP_200_OK)
     except AuthUser.DoesNotExist:
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])
+def add_admin_user(request, username, is_superuser, is_staff):
+    try:
+        user = AuthUser.objects.get(username=username)
+        user.is_superuser = is_superuser
+        user.is_staff = is_staff
+        user.save()
+        return Response({'message': f'User {username} promoted to { "admin" if is_superuser else "staff" }'}, status=status.HTTP_200_OK)
+    except AuthUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])
+def demote_admin_user(request, username):
+    try:
+        user = AuthUser.objects.get(username=username)
+        user.is_superuser = False
+        user.is_staff = False
+        user.save()
+        return Response({'message': f'User {username} demoted from admin/staff'}, status=status.HTTP_200_OK)
+    except AuthUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_user_by_username(request, username):
+    try:
+        user = AuthUser.objects.get(username=username)
+        serializer = UserListSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except AuthUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['GET'])
+def get_admins(request):
+    from django.db.models import Q
+    admins = AuthUser.objects.filter(Q(is_superuser=True) | Q(is_staff=True))
+    
+    admin_list = []
+    for admin in admins:
+        first = (admin.first_name or '').strip()
+        last = (admin.last_name or '').strip()
+        name = f"{first} {last}".strip() or admin.username
+        
+        initials = ""
+        if first:
+            initials += first[0].upper()
+        if last:
+            initials += last[0].upper()
+        if not initials:
+            initials = admin.username[:2].upper()
+        
+        role = "Super Admin" if admin.is_superuser else "Staff"
+        admin_status = "Active" if admin.is_active else "Inactive"
+        
+        admin_list.append({
+            "id": admin.id,
+            "initials": initials,
+            "name": name,
+            "email": admin.email,
+            "role": role,
+            "status": admin_status
+        })
+    
+    return Response(admin_list, status=status.HTTP_200_OK)
