@@ -33,12 +33,19 @@ def get_booking(code: str):
                 "tournament": outcome["sport"]["category"]["tournament"]["name"]
             })
 
+        total_odds = 1.0
+        for game in games:
+            if game["odd"]:
+                total_odds *= game["odd"]
+
         return {
             "deadline": deadline,
             "shareCode": data["shareCode"],
             "shareURL": data["shareURL"],
+            "totalOdds": round(total_odds, 2),
             "games": games
         }
 
     except requests.RequestException as e:
         return {"error": f"Request failed: {e}"}
+    
