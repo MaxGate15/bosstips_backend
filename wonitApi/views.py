@@ -526,8 +526,8 @@ def upload_slip(request):
             # prepare Games instances for bulk_create
             game_objs = []
             for g in games_payload:
-                team1 = g.get('team1') or ''
-                team2 = g.get('team2') or ''
+                team1 = g.get('home') or ''
+                team2 = g.get('away') or ''
                 prediction = g.get('prediction') or ''
                 odds = str(g.get('odds') or '')
                 league = g.get('category') or ''
