@@ -65,7 +65,7 @@ class AnotherDayGamesView(APIView):
 
         games = Games.objects.filter(matchday=matchday).first()
 
-        if not games.exists():
+        if not games:
             return Response({'message': f'No games found for {formatted_date}'}, status=status.HTTP_200_OK)
 
         serializer = GamesSerializer(games, many=True)
