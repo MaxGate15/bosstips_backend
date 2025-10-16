@@ -63,13 +63,107 @@ class AnotherDayGamesView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        games = Games.objects.filter(matchday=matchday).first()
+        # Build the structure you requested: list of slips with nested games
+        slips_qs = Slips.objects.filter(match_day=matchday)
 
-        if not games:
-            return Response({'message': f'No games found for {formatted_date}'}, status=status.HTTP_200_OK)
+        if not slips_qs.exists():
+            return Response([], status=status.HTTP_200_OK)
 
-        serializer = GamesSerializer(games, many=True)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        out = []
+        for slip in slips_qs:
+            # slip id fallback handling
+            slip_id = getattr(slip, "id", None) or getattr(slip, "slip_id", None)
+
+            # try to get related games; fallback to common FK name
+            # Preferred: use the ManyToMany manager on the slip instance.
+            # Fallback: use the reverse relation on Games (related_name='slips').
+            if hasattr(slip, "games"):
+                games_qs = slip.games.all()
+            else:
+                games_qs = Games.objects.filter(slips=slip)
+
+            games_list = []
+            for g in games_qs:
+                # game id fallback
+                game_id = getattr(g, "id", None) or getattr(g, "game_id", None)
+
+                # matchday formatting
+                mg = getattr(g, "matchday", None)
+                if hasattr(mg, "isoformat"):
+                    mg = mg.isoformat()
+
+                # time_created formatting (time only with microseconds like your example)
+                tc = getattr(g, "time_created", None)
+                if isinstance(tc, datetime):
+                    tc_str = tc.strftime("%H:%M:%S.%f")
+                elif tc is not None:
+                    tc_str = str(tc)
+                else:
+                    tc_str = ""
+
+                games_list.append({
+                    "game_id": game_id,
+                    "matchday": mg,
+                    "time_created": tc_str,
+                    "game_type": getattr(g, "game_type", "") or "",
+                    "team1": getattr(g, "team1", "") or "",
+                    "team2": getattr(g, "team2", "") or "",
+                    "prediction": getattr(g, "prediction", "") or "",
+                    "result": getattr(g, "result", "") or "",
+                    "odd": str(getattr(g, "odd", "") or "")
+                })
+
+            # booking code: try slip.booking_code, fallback to first BookingCode
+            bc = getattr(slip, "booking_code", None)
+            if bc is None:
+                bc = BookingCode.objects.first()
+
+            booking_code = None
+            if bc:
+                booking_code = {
+                    "bc_id": getattr(bc, "bc_id", None) or getattr(bc, "id", None),
+                    "sportyBet_code": getattr(bc, "sportyBet_code", "") or "",
+                    "betWay_code": getattr(bc, "betWay_code", "") or ""
+                }
+
+            # other slip-level fields and formatting
+            results = getattr(slip, "results", "") or "updated"
+            total_odd = str(getattr(slip, "total_odd", "") or "")
+            price = str(getattr(slip, "price", "") or "")
+
+            md = getattr(slip, "match_day", None) or getattr(slip, "matchday", None)
+            if hasattr(md, "isoformat"):
+                md = md.isoformat()
+
+            start_time = getattr(slip, "start_time", None)
+            if isinstance(start_time, datetime):
+                start_time = start_time.strftime("%H:%M:%S.%f")
+            elif start_time is None:
+                start_time = ""
+
+            date_created = getattr(slip, "date_created", None)
+            if hasattr(date_created, "isoformat"):
+                date_created = date_created.isoformat()
+            elif date_created is None:
+                date_created = md or ""
+
+            category = getattr(slip, "category", "") or ""
+
+            out.append({
+                "slip_id": slip_id,
+                "games": games_list,
+                "results": results,
+                "total_odd": total_odd,
+                "price": price,
+                "booking_code": booking_code,
+                "match_day": md,
+                "start_time": start_time,
+                "date_created": date_created,
+                "category": category
+            })
+
+        return Response(out, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET'])
