@@ -18,7 +18,7 @@ urlpatterns = [
     path('today-games/',TodaysGamesView.as_view(),name='todays-game'),
     path('tomorrow-games/',TomorrowGamesView.as_view(),name='tomorrows-game'),
     path('yesterday-games/',YesterdayGamesView.as_view(),name='yesterdays-game'),
-    path('other-games',YesterdayGamesView.as_view()),
+    path('other-games',AnotherDayGamesView.as_view()),
     path('codes/',get_booking_code),
     path('vvip-today/',TodayGamesVip.as_view()),
     path('vvip-price/',vvipPrice),
